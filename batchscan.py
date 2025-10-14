@@ -21,7 +21,7 @@ waitlimit = 300 # a limit for waiting to fix errors
 today = datetime.date.today().isoformat() 
 
 def parse_arguments():
-    global default_outdir,default_logdir
+    global default_outdir,default_logdir,tmpdir
 
     # argument list
     parser = argparse.ArgumentParser(description='Process arguments for single and double sided scan')
