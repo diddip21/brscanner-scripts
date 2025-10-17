@@ -19,7 +19,7 @@ default_logdir = os.path.join('/tmp', 'brscan')
 default_outdir = os.path.join('/tmp', 'brscan')
 tmpdir = os.path.join('/tmp', 'brscan','documents')
 waitlimit = 300 # a limit for waiting to fix errors
-today = datetime.date.today().isoformat() 
+today = datetime.date.today().isoformat()
 
 def parse_arguments():
     global default_outdir,default_logdir,tmpdir
@@ -81,6 +81,7 @@ def parse_arguments():
 
     return args
 
+b_remove_tmp = True
 def cleanup_tmp_files(prefix, timenow, tmp_directory, logfile, debug):
     """
     Remove temporary scan files for this run:
@@ -90,10 +91,11 @@ def cleanup_tmp_files(prefix, timenow, tmp_directory, logfile, debug):
     """
     try:
         pnm_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-part-*.pnm")
-        pdf_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-part-*.pdf")
+        pdf_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-*.pdf")
+        png_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-part-*.png")
         removed_any = False
 
-        for pattern in (pnm_pattern, pdf_pattern):
+        for pattern in (pnm_pattern, pdf_pattern,png_pattern):
             for f in glob.glob(pattern):
                 try:
                     os.remove(f)
@@ -292,6 +294,7 @@ if args.duplex == 'manual':
                 # compile the odd pages into a single pdf
                 compiled_pdf_filename = tmpdir +  '/' + args.prefix + '-' + today + '-' + str(int(time.time())) + '-odd.pdf'
                 filestopdftk = converted_files
+                b_remove_tmp = False
 
                 # write filelist to outputdir, used in odd/even mechanism.
                 tempf = open(odd_files_name,'w')
@@ -330,7 +333,8 @@ if args.duplex == 'manual':
 
                 # cleanup temporary files for this run
                 try:
-                    cleanup_tmp_files(args.prefix, args.timenow, tmpdir, logfile, debug)
+                    if b_remove_tmp:
+                        cleanup_tmp_files(args.prefix, args.timenow, tmpdir, logfile, debug)
                 except Exception as e:
                     scanutils.logprint('Error during tmp cleanup', e)
                     if debug:
@@ -409,7 +413,8 @@ else: # if not (double sided and manual double scanning) simply run single sided
 
             # cleanup temporary files for this run
             try:
-                cleanup_tmp_files(args.prefix, args.timenow, tmpdir, logfile, debug)
+                if b_remove_tmp:
+                    cleanup_tmp_files(args.prefix, args.timenow, tmpdir, logfile, debug)
             except Exception as e:
                 scanutils.logprint('Error during tmp cleanup', e)
                 if debug:
