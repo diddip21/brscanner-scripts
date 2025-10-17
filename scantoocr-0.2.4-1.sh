@@ -40,7 +40,7 @@ cd ${basedir}
 echo "basedir = $basedir" 
 
 # ugly hack that makes environment variables set available
-cfgfile=$(ls ../brscan-skey-*.cfg)
+cfgfile=$(ls ../brscan-skey.config)
 echo "cfgfile = $cfgfile"
 if [[ -r "$cfgfile" ]]; then
     echo "Found cfgfile"
