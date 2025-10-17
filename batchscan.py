@@ -348,6 +348,21 @@ if args.duplex == 'manual':
     #close logfile
     logfile.close() 
 
+    # If we were running manual duplex and just ran in 'run_odd' mode,
+    # re-exec the script so it runs again and picks up the saved odd files
+    # list; the next run will detect the odd-filelist and operate in 'run_even'.
+    if args.duplex == 'manual' and run_mode == 'run_odd':
+        try:
+            scanutils.logprint('Odd pages saved. Re-running script to scan even pages (run_even).')
+            # Re-exec with the same command-line but force --timenow to the original value
+            # so the second run will look for files with the same timestamp.
+            new_argv = [sys.executable] + sys.argv + ['--timenow', str(args.timenow)]
+            os.execv(sys.executable, new_argv)
+        except Exception as e:
+            scanutils.logprint('Failed to re-exec for even scan', e)
+            if debug:
+                traceback.print_exc(file=sys.stdout)
+
 
 else: # if not (double sided and manual double scanning) simply run single sided scanning routine
     # in case we have args.duplex and args.duplextype = 'manual'
