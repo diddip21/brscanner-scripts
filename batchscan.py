@@ -90,9 +90,9 @@ def cleanup_tmp_files(prefix, timenow, tmp_directory, logfile, debug):
     - try to remove tmp_directory if it becomes empty
     """
     try:
-        pnm_pattern = os.path.join(tmp_directory, f"{prefix}-part-*.pnm")
-        png_pattern = os.path.join(tmp_directory, f"{prefix}-part-*.png")
-        pdf_pattern = os.path.join(tmp_directory, f"{prefix}-part-*.pdf")
+        pnm_pattern = os.path.join(tmp_directory, f"{prefix}-*-part-*.pnm")
+        png_pattern = os.path.join(tmp_directory, f"{prefix}-*-part-*.png")
+        pdf_pattern = os.path.join(tmp_directory, f"{prefix}-*-part-*.pdf")
         pdfodd_pattern = os.path.join(tmp_directory, f"{prefix}-*-odd.pdf")
         removed_any = False
 
