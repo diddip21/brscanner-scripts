@@ -283,6 +283,8 @@ if args.duplex == 'manual':
         if number_scanned > 0:
             # waiting is builtin to convert_to_pdf, but ideally you should pass the process handle back and you wait in the main script.
             err,converted_files = scanutils.convert_to_pdf(scanned_files,wait=0,debug=debug,logfile=logfile)
+            if debug:
+                scanutils.logprint("scanutils.convert_to_pdf finished ")
 
             # delete original scanned files
             if not err and len(converted_files) == len(scanned_files):
@@ -397,6 +399,8 @@ else: # if not (double sided and manual double scanning) simply run single sided
         if number_scanned > 0:
             # waiting is builtin to convert_to_pdf, but ideally you should pass the process handle back and you wait in the main script.
             err,converted_files = scanutils.convert_to_pdf(scanned_files,wait=0,debug=debug,logfile=logfile)
+            if debug:
+                scanutils.logprint("scanutils.convert_to_pdf finished ")
 
             # delete original scanned files
             if not err and len(converted_files) == len(scanned_files):
