@@ -85,17 +85,18 @@ b_remove_tmp = True
 def cleanup_tmp_files(prefix, timenow, tmp_directory, logfile, debug):
     """
     Remove temporary scan files for this run:
-    - .pnm files created in tmp_directory matching prefix-timenow-part-*.pnm
+    - .pnm files created in tmp_directory matching prefix-part-*.pnm
     - temporary odd filelist (.<prefix>-odd-filelist) in tmp_directory
     - try to remove tmp_directory if it becomes empty
     """
     try:
-        pnm_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-part-*.pnm")
-        pdf_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-*.pdf")
-        png_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-part-*.png")
+        pnm_pattern = os.path.join(tmp_directory, f"{prefix}-part-*.pnm")
+        png_pattern = os.path.join(tmp_directory, f"{prefix}-part-*.png")
+        pdf_pattern = os.path.join(tmp_directory, f"{prefix}-part-*.pdf")
+        pdfodd_pattern = os.path.join(tmp_directory, f"{prefix}-*-odd.pdf")
         removed_any = False
 
-        for pattern in (pnm_pattern, pdf_pattern,png_pattern):
+        for pattern in (pnm_pattern,png_pattern,pdf_pattern,pdfodd_pattern):
             for f in glob.glob(pattern):
                 try:
                     os.remove(f)
