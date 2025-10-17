@@ -33,7 +33,7 @@ cd ${basedir}
 echo "basedir = $basedir" 
 
 # ugly hack that makes environment variables set available
-cfgfile=$(ls ../brscan-skey-*.cfg)
+cfgfile=$(ls ../brscan-skey.config)
 echo "cfgfile = $cfgfile"
 if [[ -r "$cfgfile" ]]; then
     echo "Found cfgfile"
@@ -47,7 +47,7 @@ fi
 if [[ -z "$SAVETO" ]];  then
     SAVETO=${HOME}'/brscan/documents'
 else
-    SAVETO=${SAVETO}'/documents/'
+    SAVETO=${SAVETO}'/'
 fi
 
 mkdir -p $SAVETO
