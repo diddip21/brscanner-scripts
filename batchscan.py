@@ -4,6 +4,7 @@
 
 import os,sys,re,time,datetime,subprocess
 import argparse,logging,traceback,tempfile
+import glob
 
 import scanutils
 
@@ -79,6 +80,53 @@ def parse_arguments():
             args.source = scanutils.get_default_duplex_source()
 
     return args
+
+def cleanup_tmp_files(prefix, timenow, tmp_directory, logfile, debug):
+    """
+    Remove temporary scan files for this run:
+    - .pnm files created in tmp_directory matching prefix-timenow-part-*.pnm
+    - temporary odd filelist (.<prefix>-odd-filelist) in tmp_directory
+    - try to remove tmp_directory if it becomes empty
+    """
+    try:
+        pnm_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-part-*.pnm")
+        pdf_pattern = os.path.join(tmp_directory, f"{prefix}-{timenow}-part-*.pdf")
+        removed_any = False
+
+        for pattern in (pnm_pattern, pdf_pattern):
+            for f in glob.glob(pattern):
+                try:
+                    os.remove(f)
+                    removed_any = True
+                    scanutils.logprint('Removed tmp file', f)
+                except Exception as e:
+                    scanutils.logprint('Error removing tmp file', f, e)
+
+        # remove odd files list if present (it may be located in tmp_directory)
+        odd_name = os.path.join(tmp_directory, '.' + prefix + '-odd-filelist')
+        if os.path.exists(odd_name):
+            try:
+                os.remove(odd_name)
+                removed_any = True
+                scanutils.logprint('Removed odd files list', odd_name)
+            except Exception as e:
+                scanutils.logprint('Error removing odd files list', odd_name, e)
+
+        # attempt to remove tmp_directory if empty
+        try:
+            if os.path.isdir(tmp_directory) and not os.listdir(tmp_directory):
+                os.rmdir(tmp_directory)
+                scanutils.logprint('Removed empty tmpdir', tmp_directory)
+        except Exception as e:
+            scanutils.logprint('Could not remove tmpdir', tmp_directory, e)
+
+        if not removed_any and debug:
+            scanutils.logprint('No temporary files matched for cleanup (prefix, timenow):', prefix, timenow)
+
+    except Exception as e:
+        scanutils.logprint('cleanup_tmp_files error', e)
+        if debug:
+            traceback.print_exc(file=(logfile if logfile else sys.stdout))
 
 # SCRIPT START
 print("\n",today," Starting ", sys.argv[0]," at",time.time())
@@ -279,6 +327,14 @@ if args.duplex == 'manual':
 
             if len(filestopdftk) > 0:
                 scanutils.run_pdftk(filestopdftk,compiled_pdf_filename,debug=debug,logfile=logfile)
+
+                # cleanup temporary files for this run
+                try:
+                    cleanup_tmp_files(args.prefix, args.timenow, tmpdir, logfile, debug)
+                except Exception as e:
+                    scanutils.logprint('Error during tmp cleanup', e)
+                    if debug:
+                        traceback.print_exc(file=logfile if logfile else sys.stdout)
             else:
                 scanutils.logprint('No files to compile')
 
@@ -350,6 +406,14 @@ else: # if not (double sided and manual double scanning) simply run single sided
             compiled_pdf_filename = args.outputdir + '/' + args.prefix + '-' + today + '-' + str(int(time.time())) + '.pdf'
 
             scanutils.run_pdftk(converted_files,compiled_pdf_filename,debug=debug,logfile=logfile)
+
+            # cleanup temporary files for this run
+            try:
+                cleanup_tmp_files(args.prefix, args.timenow, tmpdir, logfile, debug)
+            except Exception as e:
+                scanutils.logprint('Error during tmp cleanup', e)
+                if debug:
+                    traceback.print_exc(file=logfile if logfile else sys.stdout)
 
         else:
             scanutils.logprint('No scanned files found')
